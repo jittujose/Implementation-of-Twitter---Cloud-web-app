@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Firestore basics</title>
+    <link type="text/css" href="{{ url_for('static', path='/styles.css') }}" rel="stylesheet"/>
+    <script type="module" src="{{ url_for('static', path='/firebase-login.js') }}"></script>
+    <style>/* Additional CSS styles with more colors */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f2f5;
+            color: #333;
+        }
+        
+        #login-box {
+            margin: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        #login-box input[type="email"],
+        #login-box input[type="password"] {
+            margin-bottom: 10px;
+            padding: 10px;
+            width: 100%;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        
+        #login-box button {
+            padding: 10px 20px;
+            background-color: #1da1f2;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        
+        #login-box button:hover {
+            background-color: #0d8af2;
+        }
+        
+        #sign-out {
+            margin: 20px;
+            padding: 10px 20px;
+            background-color: #dc3545;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        
+        #sign-out:hover {
+            background-color: #c82333;
+        }
+        
+        .tweet-section {
+            display: flex;
+            justify-content: space-between;
+            margin: 20px;
+            
+
+        }
+        
+        .tweet-form textarea {
+            width: calc(100% - 20px);
+            padding: 10px;
+            resize: none;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        
+        .tweet-form input[type="file"] {
+            margin-top: 10px;
+        }
+        
+        .tweet-form input[type="submit"] {
+            margin-top: 10px;
+            padding: 10px 20px;
+            background-color: #1da1f2;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        
+        .tweet-form input[type="submit"]:hover {
+            background-color: #0d8af2;
+        }
+        
+        .search-section {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .search-section p {
+            margin-top: 0;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .search-section form {
+            margin-bottom: 10px;
+        }
+        
+        .search-section input[type="text"],
+        .search-section input[type="submit"] {
+            margin-top: 5px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        
+        .search-section input[type="submit"] {
+            background-color: #1da1f2;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .search-section input[type="submit"]:hover {
+            background-color: #0d8af2;
+        }
+        
+        .tweet {
+            background-color: #fff;
+            border: 1px solid #ccd6dd;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+
+        }
+        
+        .tweet .tweet-header {
+            margin-bottom: 10px;
+        }
+        
+        .tweet .tweet-author {
+            color: #1da1f2;
+            font-weight: bold;
+        }
+        
+        .tweet .tweet-content p {
+            margin: 0;
+            color: #333;
+        }
+        
+        .tweet .tweet-image img {
+            max-width: 100%;
+            border-radius: 5px;
+        }
+        
+        .tweet .tweet-actions form {
+            display: inline;
+        }
+        
+        .tweet .tweet-actions form input[type="submit"] {
+            margin-left: 10px;
+            padding: 5px 10px;
+            background-color: #1da1f2;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        
+        .tweet .tweet-actions form input[type="submit"]:hover {
+            background-color: #0d8af2;
+        }
+        
+    </style>
+</head>
+<body>
+<div id="login-box" hidden="true">
+    Email :<input type="email" name="" id="email"><br/>
+    Password: <input type="password" name="" id="password"><br/>
+    <button id="login">Login</button>
+    <button id="sign-up">Sign Up</button>
+</div>
+<button id="sign-out" hidden="true">Sign out</button>
+
+{% if user_token %}
+    {% if user_info ==  None %}
+        <form action="/set-user" method="post">
+            User Name: <input type="text" name="userName"><br>
+            <input type="submit" value="Set User Name">
+        </form>
+    {% else %}
+        <h1>  
+        <p>Hi {{ user_info.get('name') }}</p></h1>
+        <div class="tweet-section">
+            <div class="tweet-form">
+                <form action="/add-tweet" method="post" enctype="multipart/form-data">
+                    Content :<textarea name="content" cols="50" rows="5" maxlength="140"></textarea><br/>
+                    Upload Image: <input type="file" name="file_name" accept="image/jpeg, image/png" />
+                    <input type="hidden" name="userToken" value="{{ user_token }}"/><br/>
+                    <input type="hidden" name="userName" value="{{ user_info.get('name') }}"/>
+                    <input type="submit" value="Tweet">
+                </form>
+            </div>
+            <br/>
+            <br/>
+            <div class="search-section">
+                <p>Search User name</p>
+                <form action="search-user" method="post">
+                    Enter name of the user<input type="text" name="name"/>
+                    <input type="submit" value="Search"/>
+                </form>
+                {% if search_users %}
+                    <p>Found Users:</p>
+                    {% for oneUser in search_users %}
+                        <a href="/view-profile?viewname={{ oneUser.get('name') }}">{{ oneUser.get('name') }}</a><br/>
+                    {% endfor %}
+                {% endif %}
+                <p>Search Tweet with content</p>
+                <form action="search-content" method="post">
+                    Enter content to search<input type="text" name="content"/>
+                    <input type="submit" value="Search"/>
+                </form>
+                <br/>
+            {% if tweets_list %}
+            Tweets <br/>
+            {% for oneTweet in tweets_list %}
+            <div class="tweet">
+                <div class="tweet-header">
+                    <span class="tweet-author">User: {{ oneTweet.get('username') }}</span>
+                    {{ oneTweet.get('date') }}
+                </div>
+                <div class="tweet-content">
+                    <p>{{ oneTweet.get('content') }}</p>
+                    {% if oneTweet.get('img_src') != ''  %}
+                        <div class="tweet-image">
+                            <img src="{{ oneTweet.get('img_src') }}" width="300" />
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="tweet-actions">
+                    <form action="/edit-tweet-page" method="post">
+                        <input type="hidden" name="id" value="{{ oneTweet.get('tweetid') }}" />
+                        <input type="submit" value="Edit" class="tweet-button" />
+                    </form>
+                    <form action="/delete-tweet" method="post">
+                        <input type="hidden" name="id" value="{{ oneTweet.get('tweetid') }}" />
+                        <input type="submit" value="Delete" class="tweet-button" />
+                    </form>
+                </div>
+            </div>
+        {% endfor %}
+    {% endif %}
+            </div>
+        </div>
+        <h3>Tweets</h3>
+        {% for oneTweet in all_tweets %}
+            <div class="tweet">
+                <div class="tweet-header">
+                    <span class="tweet-author"><h3>User: {{ oneTweet.get('username') }}</h3></span>
+                    <h6>{{ oneTweet.get('date') }}</h6>
+                </div>
+                <div class="tweet-content">
+                    <p>{{ oneTweet.get('content') }}</p>
+                    {% if oneTweet.get('img_src') != ''  %}
+                        <div class="tweet-image">
+                            <img src="{{ oneTweet.get('img_src') }}" width="300" />
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="tweet-actions">
+                    <form action="/edit-tweet-page" method="post">
+                        <input type="hidden" name="id" value="{{ oneTweet.get('tweetid') }}" />
+                        <input type="submit" value="Edit" class="tweet-button" />
+                    </form>
+                    <form action="/delete-tweet" method="post">
+                        <input type="hidden" name="id" value="{{ oneTweet.get('tweetid') }}" />
+                        <input type="submit" value="Delete" class="tweet-button" />
+                    </form>
+                </div>
+            </div>
+        {% endfor %}
+    {% endif %}
+{% endif %}
+</body>
+</html>

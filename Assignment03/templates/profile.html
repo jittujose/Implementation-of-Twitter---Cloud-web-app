@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Firestore basics</title>
+        <link type="text/css" href="{{ url_for('static', path='/styles.css') }}" rel="stylesheet"/>
+    <script type="module" src="{{ url_for('static', path='/firebase-login.js') }}"></script>
+    <style>
+        /* styles.css */
+
+/* Global styles */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f0f0f0;
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Login box */
+#login-box {
+    margin-top: 20px;
+}
+
+#login-box input[type="email"],
+#login-box input[type="password"] {
+    margin-bottom: 10px;
+    padding: 5px;
+    width: 200px;
+}
+
+#login-box button {
+    padding: 8px 16px;
+    background-color: #007bff;
+    border: none;
+    color: white;
+    cursor: pointer;
+}
+
+#login-box button:hover {
+    background-color: #0056b3;
+}
+
+/* Sign out button */
+#sign-out {
+    margin-top: 10px;
+    padding: 8px 16px;
+    background-color: #dc3545;
+    border: none;
+    color: white;
+    cursor: pointer;
+}
+
+#sign-out:hover {
+    background-color: #bd2130;
+}
+
+/* Tweets */
+.tweet {
+    margin-bottom: 20px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 10px;
+    background-color: #fff;
+}
+
+.tweet-header {
+    margin-bottom: 10px;
+}
+
+.tweet-author {
+    font-weight: bold;
+}
+
+.tweet-image img {
+    max-width: 100%;
+    height: auto;
+    margin-top: 10px;
+}
+
+/* Form */
+form {
+    margin-bottom: 20px;
+}
+
+input[type="submit"] {
+    padding: 8px 16px;
+    background-color: #007bff;
+    border: none;
+    color: white;
+    cursor: pointer;
+}
+
+input[type="submit"]:hover {
+    background-color: #0056b3;
+}
+
+    </style>
+    </head>
+<body>
+    <div id="login-box" hidden="true">
+        Email :<input type="email" name="" id="email"><br/>
+        Password: <input type="password" name="" id="password"><br/>
+        <button id="login">Login</button>
+        <button id="sign-up">Sign Up</button>
+    </div>
+    <button id="sign-out" hidden="true">Sign out</button>
+    <br/>
+    <form action="/" method="get">
+        <input type="submit" value="Home"/>
+    </form>
+
+    <h1>Name: {{ user_profile.get('name') }}</h1>
+    <br/>
+    {% if follow_status %}
+    <form action="/unfollow" method="post">
+        <input type="hidden" value="{{ user_profile.get('name') }}" name="viewname"/>
+        <input type="submit" value="Unfollow"/>
+    </form>
+    {% else %}
+    <form action="/follow" method="post">
+        <input type="hidden" value="{{ user_profile.get('name') }}" name="viewname"/>
+        <input type="submit" value="Follow"/>
+    </form>
+    {% endif %}
+
+    <h3>Tweets</h3> <br/>
+    {% for oneTweet in tweets_list %}
+    <div class="tweet">
+        <div class="tweet-header">
+            <span class="tweet-author">User: {{ oneTweet.get('username') }}</span>
+            {{ oneTweet.get('date') }}
+        </div>
+        <div class="tweet-content">
+            <p>{{ oneTweet.get('content') }}</p>
+            {% if oneTweet.get('img_src') != ''  %}
+                <div class="tweet-image">
+                    <img src="{{ oneTweet.get('img_src') }}" width="300" />
+                </div>
+            {% endif %}
+        </div>
+            {% endfor %}
+    </div>
+
+
+</body>
+</html>
